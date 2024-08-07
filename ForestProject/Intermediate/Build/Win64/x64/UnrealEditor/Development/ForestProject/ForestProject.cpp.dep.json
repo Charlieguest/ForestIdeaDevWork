@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\charl\\documents\\unreal projects\\forestproject\\source\\forestproject\\forestproject.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\charl\\documents\\unreal projects\\forestproject\\intermediate\\build\\win64\\x64\\forestprojecteditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\users\\charl\\documents\\unreal projects\\forestproject\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\forestproject\\definitions.forestproject.h",
+            "c:\\users\\charl\\documents\\unreal projects\\forestproject\\source\\forestproject\\forestproject.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

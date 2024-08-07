@@ -1,0 +1,8 @@
+{
+	"SourceFiles": [
+		"C:\\Users\\Charl\\Documents\\Unreal Projects\\ForestProject\\Source\\ForestProject\\ForestProject.Build.cs",
+		"C:\\Users\\Charl\\Documents\\Unreal Projects\\ForestProject\\Source\\ForestProject.Target.cs",
+		"C:\\Users\\Charl\\Documents\\Unreal Projects\\ForestProject\\Source\\ForestProjectEditor.Target.cs"
+	],
+	"EngineVersion": "5.4.3"
+}
