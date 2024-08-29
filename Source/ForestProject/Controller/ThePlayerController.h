@@ -20,18 +20,19 @@ class FORESTPROJECT_API AThePlayerController : public APlayerController, public 
 protected:
 
 	UPROPERTY()
-	TObjectPtr<AThePlayerCharacter> _PlayerCharacter;
+	TObjectPtr<ACharacter> _PlayerCharacter;
 
 	UPROPERTY()
 	TObjectPtr<ATheGameMode> _TheGameMode;
 
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=InputMapping, meta=(AllowPrivateAccess = "true"))
+	UInputMappingContext* _PlayerMappingContext;
+
 public:
 
 	virtual void SetupInputComponent() override;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=InputMapping, meta=(AllowPrivateAccess = "true"))
-	UInputMappingContext* _PlayerMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=InputMapping, meta=(AllowPrivateAccess = "true"))
 	UInputAction* _Move;
@@ -59,5 +60,8 @@ public:
 	void StandInput(const FInputActionInstance& Instance);
 	void JumpInput(const FInputActionInstance& Instance);
 	void AimWeapon(const FInputActionInstance& Instance);
+	void StopAimingWeapon(const FInputActionInstance& Instance);
 	void ShootWeapon(const FInputActionInstance& Instance);
+
+	void PossessPlayer();
 };
