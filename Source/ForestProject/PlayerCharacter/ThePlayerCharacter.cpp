@@ -6,6 +6,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogThePlayerCharacter, Display, All);
+
 // Sets default values
 AThePlayerCharacter::AThePlayerCharacter()
 {
@@ -59,7 +61,7 @@ void AThePlayerCharacter::IALook_Implementation(const FInputActionInstance& Inst
 void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& Instance)
 {
 	bool BoolValue = Instance.GetValue().Get<bool>();
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("FIRE!"));
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interact!"));
 }
 
 void AThePlayerCharacter::IASprint_Implementation(const FInputActionInstance& Instance)
@@ -75,6 +77,7 @@ void AThePlayerCharacter::IAStopSprinting_Implementation(const FInputActionInsta
 void AThePlayerCharacter::IACrouch_Implementation(const FInputActionInstance& Instance)
 {
 	Crouch();
+	//UE_LOG(LogThePlayerCharacter, Display, TEXT("ThePlayerCharacter Working"));
 }
 
 void AThePlayerCharacter::IAStand_Implementation(const FInputActionInstance& Instance)
@@ -89,14 +92,18 @@ void AThePlayerCharacter::IAJump_Implementation(const FInputActionInstance& Inst
 
 void AThePlayerCharacter::IAAimingWeapon_Implementation(const FInputActionInstance& Instance)
 {
-	//Add Aiming code here
-	IIAInterface::IAAimingWeapon_Implementation(Instance);
+	_Camera->SetFieldOfView(_AimingFOV);
+}
+
+void AThePlayerCharacter::IAStopAimingWeapon_Implementation(const FInputActionInstance& Instance)
+{
+	_Camera->SetFieldOfView(_NormalFOV);
 }
 
 void AThePlayerCharacter::IAShootingWeapon_Implementation(const FInputActionInstance& Instance)
 {
-	//Add Shooting code here
-	IIAInterface::IAShootingWeapon_Implementation(Instance);
+	bool BoolValue = Instance.GetValue().Get<bool>();
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Fire!"));
 }
 
 // Called when the game starts or when spawned

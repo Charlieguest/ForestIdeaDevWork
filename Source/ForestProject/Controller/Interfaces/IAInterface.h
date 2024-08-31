@@ -46,5 +46,8 @@ public:
 	void IAAimingWeapon(const FInputActionInstance& Instance);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void IAStopAimingWeapon(const FInputActionInstance& Instance);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void IAShootingWeapon(const FInputActionInstance& Instance);
 };

@@ -27,6 +27,7 @@ public:
 	virtual void IAStand_Implementation(const FInputActionInstance& Instance) override;
 	virtual void IAJump_Implementation(const FInputActionInstance& Instance) override;
 	virtual void IAAimingWeapon_Implementation(const FInputActionInstance& Instance) override;
+	virtual void IAStopAimingWeapon_Implementation(const FInputActionInstance& Instance) override;
 	virtual void IAShootingWeapon_Implementation(const FInputActionInstance& Instance) override;
 
 	UPROPERTY(EditAnywhere)
@@ -43,11 +44,15 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	float _SprintSpeed;
+	float _SprintSpeed = 1000.0f;
 	UPROPERTY(EditAnywhere)
-	float _WalkSpeed;
+	float _WalkSpeed = 500.0f;
 	UPROPERTY(EditAnywhere)
-	float _CrouchSpeed;
+	float _CrouchSpeed = 300.0f;
+	UPROPERTY(EditAnywhere)
+	float _AimingFOV = 45.0f;
+	UPROPERTY(EditAnywhere)
+	float _NormalFOV = 90.0f;
 
 	UPROPERTY()
 	FVector _PlayerVelocity;
