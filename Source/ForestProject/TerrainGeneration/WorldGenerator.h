@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
 
+
 #include "WorldGenerator.generated.h"
 
 UCLASS()
@@ -46,5 +47,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
-	void GenerateTerrain(int inSectionX, int inSectionY);
+	void GenerateTerrain(int SectionIndexX, int SectionIndexY);
+
+	UFUNCTION(BlueprintCallable)
+	float GetHeight(FVector2D UVs);
 };
