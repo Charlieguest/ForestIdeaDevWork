@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ProceduralMeshComponent.h"
-
 
 #include "WorldGenerator.generated.h"
+
+class UProceduralMeshComponent;
 
 UCLASS()
 class FORESTPROJECT_API AWorldGenerator : public AActor
@@ -34,11 +34,14 @@ public:
 	int NumOfSectionsY = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int MeshSectionIndex = 0;
+	int32 MeshSectionIndex = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UProceduralMeshComponent> _ProcTerrain;
+	TObjectPtr<UProceduralMeshComponent> _BPProcTerrain;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UProceduralMeshComponent> _CodeProcTerrain;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UMaterialInterface> _ProcTerrianMat = nullptr;
 	

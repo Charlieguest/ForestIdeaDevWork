@@ -2,13 +2,17 @@
 
 #include "WorldGenerator.h"
 #include "KismetProceduralMeshLibrary.h"
+#include "ProceduralMeshComponent.h"
 
 
 // Sets default values
 AWorldGenerator::AWorldGenerator()
 {
-	_ProcTerrain = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("TerrainMesh"));
-	_ProcTerrain->SetupAttachment(GetRootComponent());
+	_BPProcTerrain = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("TerrainMesh"));
+	_BPProcTerrain->SetupAttachment(GetRootComponent());
+
+	_CodeProcTerrain = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("SeperateTerrainMesh"));
+	//_CodeProcTerrain->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -21,7 +25,7 @@ void AWorldGenerator::BeginPlay()
 void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 {
 	// Calculating the offset based on which tile section we are on
-	FVector tileOffset = FVector((XVertexCount - 1) * SectionIndexX, (YVertexCount - 1) * SectionIndexY, 0) * CellSize;
+	FVector tileOffset = FVector(SectionIndexX * (XVertexCount - 1), SectionIndexY * (YVertexCount - 1), 0) * CellSize;
 
 	//Verticies variables, the array and the single vertex variable to
 	// handle the calculations to then add to the array
@@ -33,15 +37,16 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 
 	TArray<int32> triangles;
 
+	//These play the role of "big normals" and "big tangents"
 	TArray<FVector> normals;
 	TArray<FProcMeshTangent> tangents;
 	
 	//2D For loop to calculate Verticies and UVs
 	//Starting from -1 as we want to include every vertex
 	//Looping from the 0th vertex position
-	for(int32 IVY = -1; IVY >= YVertexCount; IVY++)
+	for(int32 IVY = -1; IVY <= YVertexCount; IVY++)
 	{
-		for(int32 IVX = -1; IVX >= XVertexCount; IVX++)
+		for(int32 IVX = -1; IVX <= XVertexCount; IVX++)
 		{
 			//calculating Vertex
 			vertex = FVector(
@@ -58,9 +63,9 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 	}
 
 	//2D for loop to calculate all of the traingles
-	for(int32 ITY = 0; ITY >= YVertexCount; ITY++)
+	for(int32 ITY = 0; ITY <= YVertexCount; ITY++)
 	{
-		for(int32 ITX = 0; ITX >= XVertexCount; ITX++)
+		for(int32 ITX = 0; ITX <= XVertexCount; ITX++)
 		{
 			//Calulating triangle points from the bottom half of the square
 			triangles.Add(ITX + ITY * (XVertexCount + 2));
@@ -74,21 +79,64 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 		}
 	}
 
-	/*
+	//Subset variables of the smaller piece of tile
 	TArray<FVector> subVerticies;
-	FVector subVertex;
-
 	TArray<FVector2D> subUVs;
-	FVector2D subUV;
-
 	TArray<int32> subTriangles;
-
 	TArray<FVector> subNormals;
 	TArray<FProcMeshTangent> subTangents;
-	*/
+
+	int vertexIndex = 0;
+	
 	
 	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uVs, normals, tangents);
+
+	//Filtering subset verticies and uvs
+	for(int32 IVY = -1; IVY <= YVertexCount; IVY++ )
+	{
+		for(int32 IVX = -1; IVX <= XVertexCount; IVX++)
+		{
+			if(IVY > -1 && IVY < YVertexCount && IVX > -1 && IVX < XVertexCount)
+			{
+				subVerticies.Add(verticies[vertexIndex]);
+				subUVs.Add(uVs[vertexIndex]);
+				subNormals.Add(normals[vertexIndex]);
+				subTangents.Add(tangents[vertexIndex]);
+			}
+			//Increment index every loop to avoid adding the same value twice
+			vertexIndex++;
+		}
+	}
+
+	//2D for loop to calculate the subset of traingles
+	for(int32 ITY = 0; ITY <= YVertexCount - 2; ITY++)
+	{
+		for(int32 ITX = 0; ITX <= XVertexCount - 2; ITX++)
+		{
+			//Calulating triangle points from the bottom half of the square
+			subTriangles.Add(ITX + ITY * XVertexCount);
+			subTriangles.Add(ITX + ITY * XVertexCount + XVertexCount);
+			subTriangles.Add(ITX + ITY * XVertexCount + 1);
+
+			//Calculating triangle points from the top half
+			subTriangles.Add(ITX + ITY * XVertexCount + XVertexCount);
+			subTriangles.Add(ITX + ITY * XVertexCount + XVertexCount + 1);
+			subTriangles.Add(ITX + ITY * XVertexCount + 1);
+		}
+	}
+
+	//Create mesh section
+	//UProceduralMeshComponent* procTerrain =  NewObject<UProceduralMeshComponent>(this, "ProceduralMesh");
+	_CodeProcTerrain.Get()->CreateMeshSection(MeshSectionIndex, subVerticies, subTriangles, subNormals, subUVs, TArray<FColor>(), subTangents, true);
 	
+	if(_ProcTerrianMat)
+	{
+		_CodeProcTerrain->SetMaterial(MeshSectionIndex, _ProcTerrianMat);
+	}
+
+	//Increment mesh section index
+	//So me move on to the next mesh tile
+	MeshSectionIndex++;
 }
 
 float AWorldGenerator::GetHeight(FVector2D UVs)
