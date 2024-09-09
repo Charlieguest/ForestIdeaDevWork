@@ -52,7 +52,7 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 			vertex = FVector(
 				IVX * CellSize + tileOffset.X,
 				IVY * CellSize + tileOffset.Y,
-				0.0f);
+				GetHeight(FVector2d(vertex.X, vertex.Y)));
 			verticies.Add(vertex);
 
 			//Calculating UV
@@ -88,7 +88,6 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 
 	int vertexIndex = 0;
 	
-	
 	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uVs, normals, tangents);
 
 	//Filtering subset verticies and uvs
@@ -96,7 +95,7 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 	{
 		for(int32 IVX = -1; IVX <= XVertexCount; IVX++)
 		{
-			if(IVY > -1 && IVY < YVertexCount && IVX > -1 && IVX < XVertexCount)
+			if(-1 < IVY && IVY < YVertexCount && -1 < IVX && IVX < XVertexCount)
 			{
 				subVerticies.Add(verticies[vertexIndex]);
 				subUVs.Add(uVs[vertexIndex]);
@@ -139,8 +138,19 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 	MeshSectionIndex++;
 }
 
-float AWorldGenerator::GetHeight(FVector2D UVs)
+float AWorldGenerator::GetHeight(FVector2D Location)
 {
-	return 0.0f;
+	return
+	{
+		PerlinNoiseExtended(Location, 0.00001f, 20000.0f, FVector2d(.1f)) +
+		PerlinNoiseExtended(Location, 0.0001f, 10000.0f, FVector2d(.25f)) +
+		PerlinNoiseExtended(Location, 0.001f, 450.0f, FVector2d(.3f))
+	};
+}	
+
+float AWorldGenerator::PerlinNoiseExtended(const FVector2d Location, const float Scale, const float Amplitude,
+	const FVector2d Offset)
+{
+	return FMath::PerlinNoise2D(Location * Scale + FVector2d(0.1f, 0.1f) + Offset) * Amplitude;
 }
 

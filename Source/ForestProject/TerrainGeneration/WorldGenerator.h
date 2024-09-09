@@ -50,8 +50,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
-	void GenerateTerrain(int SectionIndexX, int SectionIndexY);
+	void GenerateTerrain(const int SectionIndexX,const int SectionIndexY);
 
 	UFUNCTION(BlueprintCallable)
-	float GetHeight(FVector2D UVs);
+	float GetHeight(FVector2D Location);
+
+	float PerlinNoiseExtended(const FVector2d Location, const float Scale, const float Amplitude, const FVector2d Offset);
 };
