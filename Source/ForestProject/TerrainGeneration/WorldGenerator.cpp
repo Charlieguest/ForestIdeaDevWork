@@ -49,10 +49,10 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 		for(int32 IVX = -1; IVX <= XVertexCount; IVX++)
 		{
 			//calculating Vertex
-			vertex = FVector(
-				IVX * CellSize + tileOffset.X,
-				IVY * CellSize + tileOffset.Y,
-				GetHeight(FVector2d(vertex.X, vertex.Y)));
+		    vertex.X = IVX * CellSize + tileOffset.X,
+			vertex.Y = IVY * CellSize + tileOffset.Y,
+			vertex.Z = GetHeight(FVector2d(vertex.X, vertex.Y));
+
 			verticies.Add(vertex);
 
 			//Calculating UV
@@ -91,7 +91,7 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uVs, normals, tangents);
 
 	//Filtering subset verticies and uvs
-	for(int32 IVY = -1; IVY <= YVertexCount; IVY++ )
+	for(int32 IVY = -1; IVY <= YVertexCount; IVY++)
 	{
 		for(int32 IVX = -1; IVX <= XVertexCount; IVX++)
 		{
