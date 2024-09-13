@@ -6,6 +6,7 @@
 #include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogThePlayerCharacter, Display, All);
@@ -16,6 +17,9 @@ AThePlayerCharacter::AThePlayerCharacter()
 	_Collision = GetCapsuleComponent();
 	_CharacterMovement = GetCharacterMovement();
 	_PlayerVelocity = _CharacterMovement->GetLastUpdateVelocity();
+	
+	_ItemLocation = CreateDefaultSubobject<UArrowComponent>(TEXT("ItemLocation"));
+	_ItemLocation->SetupAttachment(_Collision);
 
 	_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	_Camera->SetupAttachment(_Collision);
@@ -63,10 +67,11 @@ void AThePlayerCharacter::IALook_Implementation(const FInputActionInstance& Inst
 void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& Instance)
 {
 	FVector arrowLocation = _ItemLocation->GetComponentLocation();
-	AActor* playerCharacter = Cast<AThePlayerCharacter>(GetClass());
+	AActor* playerCharacter = Cast<AThePlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	
 	FHitResult hit(ForceInit);
 
-	const bool isHitting = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), arrowLocation, arrowLocation, 10.0f, TraceTypeQuery1,
+	const bool isHitting = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), arrowLocation, arrowLocation, 100.0f, TraceTypeQuery3,
 		false, ActorsToBeIgnored, EDrawDebugTrace::ForDuration, hit, true);
 	
 	if(ItemInHand == nullptr)
@@ -83,6 +88,8 @@ void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& 
 			{
 				ItemInHand->AttachToComponent(_ItemLocation, FAttachmentTransformRules::SnapToTargetIncludingScale);
 				CanHoldItem = false;
+				bool BoolValue = Instance.GetValue().Get<bool>();
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interact!"));
 			}
 		}
 		break;
@@ -96,8 +103,6 @@ void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& 
 		}
 		break;
 	}
-	bool BoolValue = Instance.GetValue().Get<bool>();
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interact!"));
 }
 
 void AThePlayerCharacter::IASprint_Implementation(const FInputActionInstance& Instance)
