@@ -38,6 +38,16 @@ public:
 	TObjectPtr<UCameraComponent> _Camera;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCharacterMovementComponent> _CharacterMovement;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UArrowComponent> _ItemLocation;
+
+	UPROPERTY()
+	TArray<AActor*> ActorsToBeIgnored;
+	
+	UPROPERTY()
+	TObjectPtr<AActor> ItemInHand;
+	UPROPERTY()
+	bool CanHoldItem;
 
 protected:
 	// Called when the game starts or when spawned

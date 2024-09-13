@@ -3,8 +3,10 @@
 
 #include "ThePlayerCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogThePlayerCharacter, Display, All);
 
@@ -60,6 +62,40 @@ void AThePlayerCharacter::IALook_Implementation(const FInputActionInstance& Inst
 
 void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& Instance)
 {
+	FVector arrowLocation = _ItemLocation->GetComponentLocation();
+	AActor* playerCharacter = Cast<AThePlayerCharacter>(GetClass());
+	FHitResult hit(ForceInit);
+
+	const bool isHitting = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), arrowLocation, arrowLocation, 10.0f, TraceTypeQuery1,
+		false, ActorsToBeIgnored, EDrawDebugTrace::ForDuration, hit, true);
+	
+	if(ItemInHand == nullptr)
+	{
+		ItemInHand = hit.GetActor();
+	}
+	
+	switch(CanHoldItem)
+	{
+	case true:
+		if(isHitting)
+		{
+			if(ItemInHand != nullptr)
+			{
+				ItemInHand->AttachToComponent(_ItemLocation, FAttachmentTransformRules::SnapToTargetIncludingScale);
+				CanHoldItem = false;
+			}
+		}
+		break;
+		
+	case false:
+		if(ItemInHand != nullptr)
+		{
+			ItemInHand->K2_DetachFromActor(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepRelative);
+			ItemInHand = nullptr;
+			CanHoldItem = true;
+		}
+		break;
+	}
 	bool BoolValue = Instance.GetValue().Get<bool>();
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interact!"));
 }
