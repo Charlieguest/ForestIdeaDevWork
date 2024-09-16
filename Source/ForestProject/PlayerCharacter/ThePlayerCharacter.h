@@ -9,6 +9,8 @@ class UCapsuleComponent;
 class UCameraComponent;
 class UCharacterMovementComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemUseDelegate, AActor*, Item);
+
 UCLASS()
 class FORESTPROJECT_API AThePlayerCharacter : public ACharacter, public IIAInterface
 {
@@ -39,7 +41,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UCharacterMovementComponent> _CharacterMovement;
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UArrowComponent> _ItemLocation;
+	TObjectPtr<UArrowComponent> _InteractionLocation;
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USceneComponent> _ItemPickUp;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UCapsuleComponent> _ItemCollision;
 
 	UPROPERTY()
 	TArray<AActor*> ActorsToBeIgnored;
@@ -48,6 +55,8 @@ public:
 	TObjectPtr<AActor> ItemInHand;
 	UPROPERTY()
 	bool CanHoldItem;
+
+	FItemUseDelegate OnItemUse;
 
 protected:
 	// Called when the game starts or when spawned

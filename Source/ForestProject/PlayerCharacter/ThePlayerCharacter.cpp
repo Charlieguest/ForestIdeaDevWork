@@ -2,6 +2,7 @@
 
 
 #include "ThePlayerCharacter.h"
+
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -17,17 +18,31 @@ AThePlayerCharacter::AThePlayerCharacter()
 	_Collision = GetCapsuleComponent();
 	_CharacterMovement = GetCharacterMovement();
 	_PlayerVelocity = _CharacterMovement->GetLastUpdateVelocity();
-	
-	_ItemLocation = CreateDefaultSubobject<UArrowComponent>(TEXT("ItemLocation"));
-	_ItemLocation->SetupAttachment(_Collision);
 
 	_Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	_Camera->SetupAttachment(_Collision);
 	_Camera->SetRelativeLocation(FVector(-10.0f, 0.0f, 60.0f));
 	_Camera->bUsePawnControlRotation = true;
 
+	_ItemPickUp = CreateDefaultSubobject<USceneComponent>(TEXT("Item PickUP"));
+	_ItemPickUp->SetupAttachment(_Camera);
+	
+	_InteractionLocation = CreateDefaultSubobject<UArrowComponent>(TEXT("ItemLocation"));
+	_InteractionLocation->SetupAttachment(_Collision);
+
 	_CharacterMovement->MaxWalkSpeed = _WalkSpeed;
 	_CharacterMovement->MaxWalkSpeedCrouched = _CrouchSpeed;
+
+	CanHoldItem = true;
+
+	ActorsToBeIgnored.Add(GetOwner());
+	ActorsToBeIgnored.Add(this);
+}
+
+// Called to bind functionality to input
+void AThePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
 void AThePlayerCharacter::IAMove_Implementation(const FInputActionInstance& Instance)
@@ -66,7 +81,7 @@ void AThePlayerCharacter::IALook_Implementation(const FInputActionInstance& Inst
 
 void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& Instance)
 {
-	FVector arrowLocation = _ItemLocation->GetComponentLocation();
+	FVector arrowLocation = _InteractionLocation->GetComponentLocation();
 	AActor* playerCharacter = Cast<AThePlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	
 	FHitResult hit(ForceInit);
@@ -84,12 +99,14 @@ void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& 
 	case true:
 		if(isHitting)
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interacting!"));
 			if(ItemInHand != nullptr)
 			{
-				ItemInHand->AttachToComponent(_ItemLocation, FAttachmentTransformRules::SnapToTargetIncludingScale);
+				//_ItemCollision = ItemInHand->FindComponentByClass<UCapsuleComponent>();
+				//_ItemCollision->SetSimulatePhysics(false);
+				ItemInHand->AttachToComponent(_ItemPickUp, FAttachmentTransformRules::SnapToTargetIncludingScale);
 				CanHoldItem = false;
-				bool BoolValue = Instance.GetValue().Get<bool>();
-				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interact!"));
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Not null!"));
 			}
 		}
 		break;
@@ -98,8 +115,10 @@ void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& 
 		if(ItemInHand != nullptr)
 		{
 			ItemInHand->K2_DetachFromActor(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepRelative);
+			//_ItemCollision->SetSimulatePhysics(true);
 			ItemInHand = nullptr;
 			CanHoldItem = true;
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Null!"));
 		}
 		break;
 	}
@@ -143,8 +162,7 @@ void AThePlayerCharacter::IAStopAimingWeapon_Implementation(const FInputActionIn
 
 void AThePlayerCharacter::IAShootingWeapon_Implementation(const FInputActionInstance& Instance)
 {
-	bool BoolValue = Instance.GetValue().Get<bool>();
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Fire!"));
+	OnItemUse.Broadcast(ItemInHand);
 }
 
 // Called when the game starts or when spawned
@@ -152,11 +170,5 @@ void AThePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-}
-
-// Called to bind functionality to input
-void AThePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 

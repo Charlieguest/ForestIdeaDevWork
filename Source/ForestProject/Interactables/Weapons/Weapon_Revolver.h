@@ -13,10 +13,7 @@ class FORESTPROJECT_API AWeapon_Revolver : public AWeapon_Base
 
 public:
 
-	virtual void FireWeapon_Implementation(AActor* Weapon) override;
-
-	UPROPERTY(EditAnywhere, Category = "Projectile")
-	TSubclassOf<AWeapon_Base> _Projectile;
+	virtual void FireWeapon_Implementation(AActor* Item) override;
 
 protected:
 	// Called when the game starts or when spawned

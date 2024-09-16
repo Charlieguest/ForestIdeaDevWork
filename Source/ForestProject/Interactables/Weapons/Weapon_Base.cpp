@@ -4,6 +4,7 @@
 
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWeapon_Base::AWeapon_Base()
@@ -20,14 +21,20 @@ AWeapon_Base::AWeapon_Base()
 	_Arrow->SetupAttachment(_Root);
 }
 
-void AWeapon_Base::FireWeapon_Implementation(AActor* Weapon)
-{
-	IShootingInterface::FireWeapon_Implementation(Weapon);
-}
 
 // Called when the game starts or when spawned
 void AWeapon_Base::BeginPlay()
 {
-	Super::BeginPlay();
+	AActor* _PlayerCharacterRef = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	_PlayerCharacter = Cast<AThePlayerCharacter>(_PlayerCharacterRef);
+
+	_PlayerCharacter->OnItemUse.AddDynamic(this, &AWeapon_Base::FireWeapon_Implementation);
 	
+}
+void AWeapon_Base::FireWeapon_Implementation(AActor* Item)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Firing!"));
+	if(Item == this)
+	{
+	}
 }
