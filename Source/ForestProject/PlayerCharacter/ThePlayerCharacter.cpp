@@ -2,9 +2,13 @@
 
 
 #include "ThePlayerCharacter.h"
+
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogThePlayerCharacter, Display, All);
 
@@ -20,8 +24,25 @@ AThePlayerCharacter::AThePlayerCharacter()
 	_Camera->SetRelativeLocation(FVector(-10.0f, 0.0f, 60.0f));
 	_Camera->bUsePawnControlRotation = true;
 
+	_ItemPickUp = CreateDefaultSubobject<USceneComponent>(TEXT("Item PickUP"));
+	_ItemPickUp->SetupAttachment(_Camera);
+	
+	_InteractionLocation = CreateDefaultSubobject<UArrowComponent>(TEXT("ItemLocation"));
+	_InteractionLocation->SetupAttachment(_Collision);
+
 	_CharacterMovement->MaxWalkSpeed = _WalkSpeed;
 	_CharacterMovement->MaxWalkSpeedCrouched = _CrouchSpeed;
+
+	CanHoldItem = true;
+
+	ActorsToBeIgnored.Add(GetOwner());
+	ActorsToBeIgnored.Add(this);
+}
+
+// Called to bind functionality to input
+void AThePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
 void AThePlayerCharacter::IAMove_Implementation(const FInputActionInstance& Instance)
@@ -60,8 +81,47 @@ void AThePlayerCharacter::IALook_Implementation(const FInputActionInstance& Inst
 
 void AThePlayerCharacter::IAInteract_Implementation(const FInputActionInstance& Instance)
 {
-	bool BoolValue = Instance.GetValue().Get<bool>();
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interact!"));
+	FVector arrowLocation = _InteractionLocation->GetComponentLocation();
+	AActor* playerCharacter = Cast<AThePlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	
+	FHitResult hit(ForceInit);
+
+	const bool isHitting = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), arrowLocation, arrowLocation, 100.0f, TraceTypeQuery3,
+		false, ActorsToBeIgnored, EDrawDebugTrace::ForDuration, hit, true);
+	
+	if(ItemInHand == nullptr)
+	{
+		ItemInHand = hit.GetActor();
+	}
+	
+	switch(CanHoldItem)
+	{
+	case true:
+		if(isHitting)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Interacting!"));
+			if(ItemInHand != nullptr)
+			{
+				//_ItemCollision = ItemInHand->FindComponentByClass<UCapsuleComponent>();
+				//_ItemCollision->SetSimulatePhysics(false);
+				ItemInHand->AttachToComponent(_ItemPickUp, FAttachmentTransformRules::SnapToTargetIncludingScale);
+				CanHoldItem = false;
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Not null!"));
+			}
+		}
+		break;
+		
+	case false:
+		if(ItemInHand != nullptr)
+		{
+			ItemInHand->K2_DetachFromActor(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepRelative);
+			//_ItemCollision->SetSimulatePhysics(true);
+			ItemInHand = nullptr;
+			CanHoldItem = true;
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Null!"));
+		}
+		break;
+	}
 }
 
 void AThePlayerCharacter::IASprint_Implementation(const FInputActionInstance& Instance)
@@ -102,8 +162,7 @@ void AThePlayerCharacter::IAStopAimingWeapon_Implementation(const FInputActionIn
 
 void AThePlayerCharacter::IAShootingWeapon_Implementation(const FInputActionInstance& Instance)
 {
-	bool BoolValue = Instance.GetValue().Get<bool>();
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Fire!"));
+	OnItemUse.Broadcast(ItemInHand);
 }
 
 // Called when the game starts or when spawned
@@ -111,11 +170,5 @@ void AThePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-}
-
-// Called to bind functionality to input
-void AThePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
