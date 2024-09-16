@@ -18,8 +18,19 @@ AWorldGenerator::AWorldGenerator()
 // Called when the game starts or when spawned
 void AWorldGenerator::BeginPlay()
 {
-	Super::BeginPlay();
+	if(_RandomiseTerrainLayout)
+	{
+		_PerlinNoiseOffset = FVector2d(FMath::RandRange(0.f, 10000.f),FMath::RandRange(0.f, 10000.f));
+		//Height
+		_MountainHeight = _MountainHeight * FMath::RandRange(0.5f, 0.8f);
+		_BoulderHeight = _BoulderHeight * FMath::RandRange(0.5f, 1.0f);
+		//Scale
+		_MountainScale = _MountainScale * FMath::RandRange(0.5f, 0.8f);
+		_BoulderScale = _BoulderScale * FMath::RandRange(0.6f, 1.0f);
+		_RockScale = _RockScale * FMath::RandRange(0.8f, 1.3f);
+	}
 	
+	Super::BeginPlay();
 }
 
 void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
@@ -142,15 +153,15 @@ float AWorldGenerator::GetHeight(FVector2D Location)
 {
 	return
 	{
-		PerlinNoiseExtended(Location, 0.00001f, 20000.0f, FVector2d(.1f)) +
-		PerlinNoiseExtended(Location, 0.0001f, 10000.0f, FVector2d(.25f)) +
-		PerlinNoiseExtended(Location, 0.001f, 450.0f, FVector2d(.3f))
+		PerlinNoiseExtended(Location, 1.f/_MountainScale, _MountainHeight, FVector2d(.05f)) +
+		PerlinNoiseExtended(Location, 1.f/_BoulderScale, _BoulderHeight, FVector2d(.16f)) +
+		PerlinNoiseExtended(Location, 1.f/_RockScale, 350.0f, FVector2d(.3f))
 	};
 }	
 
 float AWorldGenerator::PerlinNoiseExtended(const FVector2d Location, const float Scale, const float Amplitude,
 	const FVector2d Offset)
 {
-	return FMath::PerlinNoise2D(Location * Scale + FVector2d(0.1f, 0.1f) + Offset) * Amplitude;
+	return FMath::PerlinNoise2D(Location * Scale + FVector2d(0.1f, 0.1f) + Offset + _PerlinNoiseOffset) * Amplitude;
 }
 

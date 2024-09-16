@@ -18,6 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	AWorldGenerator();
 
+	// Generator Size Vars
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int YVertexCount = 50;
 
@@ -35,6 +37,31 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MeshSectionIndex = 0;
+
+	//----------------------------
+	//Randomisation of terrain vars
+	//----------------------------
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float _MountainHeight = 10000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float _BoulderHeight = 7000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float _MountainScale = 200000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float _BoulderScale = 50000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float _RockScale = 4500.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D _PerlinNoiseOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool _RandomiseTerrainLayout;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UProceduralMeshComponent> _BPProcTerrain;
