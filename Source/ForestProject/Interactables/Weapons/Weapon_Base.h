@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ForestProject/Controller/Interfaces/ShootingInterface.h"
+#include "ForestProject/Controller/Interfaces/ItemUseInterface.h"
 #include "ForestProject/PlayerCharacter/ThePlayerCharacter.h"
 #include "GameFramework/Actor.h"
 #include "Weapon_Base.generated.h"
@@ -12,7 +12,7 @@ class UArrowComponent;
 class UBoxComponent;
 
 UCLASS(Abstract)
-class FORESTPROJECT_API AWeapon_Base : public AActor, public IShootingInterface
+class FORESTPROJECT_API AWeapon_Base : public AActor, public IItemUseInterface
 {
 	GENERATED_BODY()
 
@@ -29,7 +29,7 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon_Base();
 	
-	virtual void FireWeapon_Implementation(AActor* Weapon) override;
+	virtual void UseItem_Implementation(AActor* Item) override;
 
 	UPROPERTY()
 	TObjectPtr<AThePlayerCharacter> _PlayerCharacter;

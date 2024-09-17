@@ -21,17 +21,18 @@ AWeapon_Base::AWeapon_Base()
 	_Arrow->SetupAttachment(_Root);
 }
 
-
 // Called when the game starts or when spawned
 void AWeapon_Base::BeginPlay()
 {
 	AActor* _PlayerCharacterRef = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	_PlayerCharacter = Cast<AThePlayerCharacter>(_PlayerCharacterRef);
 
-	_PlayerCharacter->OnItemUse.AddDynamic(this, &AWeapon_Base::FireWeapon_Implementation);
+	//This will receive the ItemUse Delegate
+	_PlayerCharacter->OnItemUse.AddDynamic(this, &AWeapon_Base::UseItem);
 	
 }
-void AWeapon_Base::FireWeapon_Implementation(AActor* Item)
+
+void AWeapon_Base::UseItem_Implementation(AActor* Item)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Firing!"));
 	if(Item == this)

@@ -13,7 +13,7 @@ class FORESTPROJECT_API AWeapon_Revolver : public AWeapon_Base
 
 public:
 
-	virtual void FireWeapon_Implementation(AActor* Item) override;
+	virtual void UseItem_Implementation(AActor* Item) override;
 
 protected:
 	// Called when the game starts or when spawned
