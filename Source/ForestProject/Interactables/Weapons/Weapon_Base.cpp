@@ -2,6 +2,7 @@
 
 #include "Weapon_Base.h"
 
+#include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -19,6 +20,8 @@ AWeapon_Base::AWeapon_Base()
 
 	_Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
 	_Arrow->SetupAttachment(_Root);
+
+
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +33,10 @@ void AWeapon_Base::BeginPlay()
 	//This will receive the ItemUse Delegate
 	_PlayerCharacter->OnItemUse.AddDynamic(this, &AWeapon_Base::UseItem);
 	
+	//Actors to ignore with raycasts
+	_ActorsToIgnore.Add(GetOwner());
+	_ActorsToIgnore.Add(_PlayerCharacter);
+	_ActorsToIgnore.Add(this);
 }
 
 void AWeapon_Base::UseItem_Implementation(AActor* Item)

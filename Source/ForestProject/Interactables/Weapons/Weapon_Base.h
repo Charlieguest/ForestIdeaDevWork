@@ -34,6 +34,18 @@ public:
 	UPROPERTY()
 	TObjectPtr<AThePlayerCharacter> _PlayerCharacter;
 
+	UPROPERTY()
+	FVector _CameraLocation;
+	UPROPERTY()
+	FRotator _CameraRotation;
+	UPROPERTY()
+	FVector _CameraDistance;
+	
+	UPROPERTY()
+	float _ItemRange = 2000.0f;
+	UPROPERTY()
+	TArray<AActor*> _ActorsToIgnore;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

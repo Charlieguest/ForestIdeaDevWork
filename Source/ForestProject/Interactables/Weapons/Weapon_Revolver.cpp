@@ -1,6 +1,7 @@
 ﻿
 #include "Weapon_Revolver.h"
-#include "Components/ArrowComponent.h"
+
+#include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -15,17 +16,24 @@ void AWeapon_Revolver::BeginPlay()
 
 void AWeapon_Revolver::UseItem_Implementation(AActor* Item)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Firing!"));
-	
-	/*
-		if(Item == this)
-		{
-			
-		}
-		else
-		{
-			return;
-		}
+	if(Item == this)
+	{
+		_CameraLocation = _PlayerCharacter->GetCamera()->GetComponentLocation();
+		_CameraRotation = _PlayerCharacter->GetCamera()->GetComponentRotation();
+		_CameraDistance = _CameraRotation.Vector();
 		
-		*/
+		FHitResult hit(ForceInit);
+		
+		const bool isHitting = UKismetSystemLibrary::LineTraceSingle(GetWorld(), _CameraLocation, (_CameraLocation + (_CameraDistance * _ItemRange)), TraceTypeQuery4,
+			false, _ActorsToIgnore, EDrawDebugTrace::ForDuration, hit, true);
+
+		if(isHitting)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Firing Weapon!"));
+		}
+	}
+	else
+	{
+		return;
+	}
 }
