@@ -12,25 +12,37 @@ void AWeapon_Revolver::BeginPlay()
 	_PlayerCharacter = Cast<AThePlayerCharacter>(_PlayerCharacterRef);
 
 	_PlayerCharacter->OnItemUse.AddDynamic(this, &AWeapon_Base::UseItem);
+
+	m_AmmoCount = m_MaxAmmo;
 }
 
 void AWeapon_Revolver::UseItem_Implementation(AActor* Item)
 {
 	if(Item == this)
 	{
-		_CameraLocation = _PlayerCharacter->GetCamera()->GetComponentLocation();
-		_CameraRotation = _PlayerCharacter->GetCamera()->GetComponentRotation();
-		_CameraDistance = _CameraRotation.Vector();
-		
-		FHitResult hit(ForceInit);
-		
-		const bool isHitting = UKismetSystemLibrary::LineTraceSingle(GetWorld(), _CameraLocation, (_CameraLocation + (_CameraDistance * _ItemRange)), TraceTypeQuery4,
-			false, _ActorsToIgnore, EDrawDebugTrace::ForDuration, hit, true);
-
-		if(isHitting)
+		if(m_AmmoCount > 0)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Firing Weapon!"));
+			_CameraLocation = _PlayerCharacter->GetCamera()->GetComponentLocation();
+			_CameraRotation = _PlayerCharacter->GetCamera()->GetComponentRotation();
+			_CameraDistance = _CameraRotation.Vector();
+		
+			FHitResult hit(ForceInit);
+		
+			const bool isHitting = UKismetSystemLibrary::LineTraceSingle(GetWorld(), _CameraLocation, (_CameraLocation + (_CameraDistance * _ItemRange)), TraceTypeQuery4,
+				false, _ActorsToIgnore, EDrawDebugTrace::ForDuration, hit, true);
+
+			m_AmmoCount--;
+
+			if(isHitting)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Firing Weapon!"));
+			}
 		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, TEXT("Out of Ammo"));
+		}
+		
 	}
 	else
 	{
