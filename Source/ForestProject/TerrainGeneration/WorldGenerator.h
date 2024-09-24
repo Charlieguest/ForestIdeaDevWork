@@ -7,6 +7,7 @@
 
 #include "WorldGenerator.generated.h"
 
+class USplineComponent;
 class UProceduralMeshComponent;
 
 UCLASS()
@@ -68,9 +69,22 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UProceduralMeshComponent> _CodeProcTerrain;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UMaterialInterface> _ProcTerrianMat = nullptr;
+	
+	//----------------------------
+	//Path Generation Vars
+	//----------------------------
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<USplineComponent> _PathSpline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FVector> _PathStartPoints;
+	
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FVector> _PathEndPoints;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -83,4 +97,9 @@ protected:
 	float GetHeight(FVector2D Location);
 
 	float PerlinNoiseExtended(const FVector2d Location, const float Scale, const float Amplitude, const FVector2d Offset);
+
+	void CalculatePathPoints(const FVector TerrainVertex, const int XsectionIndex, const int YSectionIndex, const int CurrentVertexCountX, const int CurrentVertexCountY);
+
+	UFUNCTION(BlueprintCallable)
+	void SetPathPoints();
 };

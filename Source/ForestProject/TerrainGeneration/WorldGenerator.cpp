@@ -3,6 +3,7 @@
 #include "WorldGenerator.h"
 #include "KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent.h"
+#include "Components/SplineComponent.h"
 
 
 // Sets default values
@@ -13,11 +14,17 @@ AWorldGenerator::AWorldGenerator()
 
 	_CodeProcTerrain = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("SeperateTerrainMesh"));
 	//_CodeProcTerrain->SetupAttachment(GetRootComponent());
+
+	_PathSpline = CreateDefaultSubobject<USplineComponent>(TEXT("SplineComponent"));
+	_PathSpline->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
 void AWorldGenerator::BeginPlay()
 {
+	_PathStartPoints.Empty();
+	_PathEndPoints.Empty();
+	
 	if(_RandomiseTerrainLayout)
 	{
 		_PerlinNoiseOffset = FVector2d(FMath::RandRange(0.f, 10000.f),FMath::RandRange(0.f, 10000.f));
@@ -112,6 +119,9 @@ void AWorldGenerator::GenerateTerrain(int SectionIndexX, int SectionIndexY)
 				subUVs.Add(uVs[vertexIndex]);
 				subNormals.Add(normals[vertexIndex]);
 				subTangents.Add(tangents[vertexIndex]);
+
+				//Calls function that calculates available path start/end points
+				CalculatePathPoints(verticies[vertexIndex], SectionIndexX, SectionIndexY, IVX, IVY);
 			}
 			//Increment index every loop to avoid adding the same value twice
 			vertexIndex++;
@@ -165,3 +175,70 @@ float AWorldGenerator::PerlinNoiseExtended(const FVector2d Location, const float
 	return FMath::PerlinNoise2D(Location * Scale + FVector2d(0.1f, 0.1f) + Offset + _PerlinNoiseOffset) * Amplitude;
 }
 
+/// Calculates the perimeter points for the trail start position
+/// Everything else "Within reason" is added to the end position
+/// 
+/// Since the terrain itself is generated in "tiles" we need to
+/// check which tile we are in before we choose which edges to select
+/// (if it's not a middle tile and we have no edges to select at all)
+void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int XsectionIndex, const int YSectionIndex, const int CurrentVertexCountX, const int CurrentVertexCountY)
+{
+	//Is it a top left corner tile
+	if(XsectionIndex == 0 && YSectionIndex == 0)
+	{
+		if(CurrentVertexCountX == 0 || CurrentVertexCountY == 0)
+		{
+			_PathStartPoints.Add(TerrainVertex);
+		}
+		else
+		{
+			_PathEndPoints.Add(TerrainVertex);
+		}
+	}
+	//Is it a bottom right corner tile
+	else if(XsectionIndex == NumOfSectionsX - 1 && YSectionIndex == NumOfSectionsY - 1)
+	{
+		if(CurrentVertexCountX == XVertexCount || CurrentVertexCountY == YVertexCount)
+		{
+			_PathStartPoints.Add(TerrainVertex);
+		}
+		else
+		{
+			_PathEndPoints.Add(TerrainVertex);
+		}
+	}
+	//Is it a top right corner tile
+	else if(XsectionIndex == NumOfSectionsX - 1 && YSectionIndex == 0)
+	{
+		if(CurrentVertexCountX == XVertexCount || CurrentVertexCountY == 0)
+		{
+			_PathStartPoints.Add(TerrainVertex);
+		}
+		else
+		{
+			_PathEndPoints.Add(TerrainVertex);
+		}
+	}
+	//Is it a bottom left corner tile
+	else if(XsectionIndex == 0 && YSectionIndex == NumOfSectionsX - 1)
+	{
+		if(CurrentVertexCountX == 0 || CurrentVertexCountY == YVertexCount)
+		{
+			_PathStartPoints.Add(TerrainVertex);
+		}
+		else
+		{
+			_PathEndPoints.Add(TerrainVertex);
+		}
+	}
+}
+
+void AWorldGenerator::SetPathPoints()
+{
+	//Setting locations of start and end point of tiles.
+	_PathSpline->SetLocationAtSplinePoint(0, _PathStartPoints[FMath::RandRange(0, _PathStartPoints.Num() - 1)], ESplineCoordinateSpace::World, true);
+	_PathSpline->SetLocationAtSplinePoint(1, _PathEndPoints[FMath::RandRange(0, _PathEndPoints.Num() - 1)], ESplineCoordinateSpace::World, true);
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("Start Points Array Size %llu"), sizeof(_PathStartPoints)));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Start Points Array Size %llu"), sizeof(_PathEndPoints)));
+}
