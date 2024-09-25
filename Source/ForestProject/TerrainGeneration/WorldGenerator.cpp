@@ -198,7 +198,7 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 	//Is it a bottom right corner tile
 	else if(XsectionIndex == NumOfSectionsX - 1 && YSectionIndex == NumOfSectionsY - 1)
 	{
-		if(CurrentVertexCountX == XVertexCount || CurrentVertexCountY == YVertexCount)
+		if(CurrentVertexCountX == XVertexCount - 1 || CurrentVertexCountY == YVertexCount - 1)
 		{
 			_PathStartPoints.Add(TerrainVertex);
 		}
@@ -210,7 +210,7 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 	//Is it a top right corner tile
 	else if(XsectionIndex == NumOfSectionsX - 1 && YSectionIndex == 0)
 	{
-		if(CurrentVertexCountX == XVertexCount || CurrentVertexCountY == 0)
+		if(CurrentVertexCountX == XVertexCount - 1 || CurrentVertexCountY == 0)
 		{
 			_PathStartPoints.Add(TerrainVertex);
 		}
@@ -222,9 +222,10 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 	//Is it a bottom left corner tile
 	else if(XsectionIndex == 0 && YSectionIndex == NumOfSectionsX - 1)
 	{
-		if(CurrentVertexCountX == 0 || CurrentVertexCountY == YVertexCount)
+		if(CurrentVertexCountX == 0 || CurrentVertexCountY == YVertexCount - 1)
 		{
 			_PathStartPoints.Add(TerrainVertex);
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Bottom Left"));
 		}
 		else
 		{
@@ -236,9 +237,15 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 void AWorldGenerator::SetPathPoints()
 {
 	//Setting locations of start and end point of tiles.
-	_PathSpline->SetLocationAtSplinePoint(0, _PathStartPoints[FMath::RandRange(0, _PathStartPoints.Num() - 1)], ESplineCoordinateSpace::World, true);
-	_PathSpline->SetLocationAtSplinePoint(1, _PathEndPoints[FMath::RandRange(0, _PathEndPoints.Num() - 1)], ESplineCoordinateSpace::World, true);
+	FVector pathStartPoint = _PathStartPoints[FMath::RandRange(0, _PathStartPoints.Num() - 1)];
+	FVector pathEndPoint;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("Start Points Array Size %llu"), sizeof(_PathStartPoints)));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Start Points Array Size %llu"), sizeof(_PathEndPoints)));
+	//Repeating until a path far enough away from the start point is found
+	do
+	{
+		pathEndPoint = _PathEndPoints[FMath::RandRange(0, _PathEndPoints.Num() - 1)];
+	} while (FMath::Abs(pathEndPoint.X - pathStartPoint.X) <= 15000.f || FMath::Abs(pathEndPoint.Y - pathStartPoint.Y) <= 15000.f);
+	
+	_PathSpline->SetLocationAtSplinePoint(0, pathStartPoint, ESplineCoordinateSpace::World, true);
+	_PathSpline->SetLocationAtSplinePoint(1, pathEndPoint, ESplineCoordinateSpace::World, true);
 }
