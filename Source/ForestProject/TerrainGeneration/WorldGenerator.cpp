@@ -190,7 +190,13 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 		{
 			_PathStartPoints.Add(TerrainVertex);
 		}
-		else
+		//Making sure endpoint isn't too close to the edge
+		else if(
+			CurrentVertexCountX > 9 &&
+			CurrentVertexCountX < XVertexCount - 10 &&
+			CurrentVertexCountY > 9 &&
+			CurrentVertexCountY < YVertexCount - 10
+			)
 		{
 			_PathEndPoints.Add(TerrainVertex);
 		}
@@ -202,7 +208,13 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 		{
 			_PathStartPoints.Add(TerrainVertex);
 		}
-		else
+		//Making sure endpoint isn't too close to the edge
+		else if(
+			CurrentVertexCountX > 9 &&
+			CurrentVertexCountX < XVertexCount - 10 &&
+			CurrentVertexCountY > 9 &&
+			CurrentVertexCountY < YVertexCount - 10
+			)
 		{
 			_PathEndPoints.Add(TerrainVertex);
 		}
@@ -214,7 +226,13 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 		{
 			_PathStartPoints.Add(TerrainVertex);
 		}
-		else
+		//Making sure endpoint isn't too close to the edge
+		else if(
+			CurrentVertexCountX > 9 &&
+			CurrentVertexCountX < XVertexCount - 10 &&
+			CurrentVertexCountY > 9 &&
+			CurrentVertexCountY < YVertexCount - 10
+			)
 		{
 			_PathEndPoints.Add(TerrainVertex);
 		}
@@ -227,7 +245,13 @@ void AWorldGenerator::CalculatePathPoints(const FVector TerrainVertex, const int
 			_PathStartPoints.Add(TerrainVertex);
 			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, TEXT("Bottom Left"));
 		}
-		else
+		//Making sure endpoint isn't too close to the edge
+		else if(
+			CurrentVertexCountX > 9 &&
+			CurrentVertexCountX < XVertexCount - 10 &&
+			CurrentVertexCountY > 9 &&
+			CurrentVertexCountY < YVertexCount - 10
+			)
 		{
 			_PathEndPoints.Add(TerrainVertex);
 		}
